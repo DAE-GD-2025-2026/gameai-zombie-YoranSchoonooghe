@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Zombies/BaseZombie.h"
+#include "Items/BaseItem.h"
 
 UStudentPerceptor::UStudentPerceptor()
 {
@@ -36,12 +37,18 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 	UBlackboardComponent* pBlackboardComponent = AIController->GetBlackboardComponent();
 	if (!pBlackboardComponent) return;
 
-	auto zombieActor = Cast<ABaseZombie>(Actor);
-	if (zombieActor)
+	if (Cast<ABaseZombie>(Actor))
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			pBlackboardComponent->SetValueAsObject(FName("TargetZombie"), Actor);
+		}
+	}
+	else if (Cast<ABaseItem>(Actor))
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
 		}
 	}
 }
