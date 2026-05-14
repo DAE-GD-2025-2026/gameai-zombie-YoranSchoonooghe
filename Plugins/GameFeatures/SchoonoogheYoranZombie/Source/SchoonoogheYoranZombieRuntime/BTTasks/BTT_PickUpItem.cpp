@@ -33,10 +33,18 @@ EBTNodeResult::Type UBTT_PickUpItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
         return EBTNodeResult::Failed;
     }
 
-    pInventory->GrabItem(0, pItem);
-    pInventory->UseItem(0);
+    auto pItemsInInventory{ pInventory->GetInventory() };
+    for (int index{ 0 }; index < pInventory->GetInventoryCapacity(); ++index)
+    {
+        if (pItemsInInventory[index]) continue;
 
-    pBlackboardComponent->ClearValue(BlackboardKey.SelectedKeyName);
+        pInventory->GrabItem(index, pItem);
+        //pInventory->UseItem(index);
 
-    return EBTNodeResult::Succeeded;
+        pBlackboardComponent->ClearValue(BlackboardKey.SelectedKeyName);
+
+        return EBTNodeResult::Succeeded;
+    }
+
+    return EBTNodeResult::Failed;
 }

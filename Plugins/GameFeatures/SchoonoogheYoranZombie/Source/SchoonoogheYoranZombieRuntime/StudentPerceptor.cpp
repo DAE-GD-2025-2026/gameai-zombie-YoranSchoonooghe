@@ -48,7 +48,11 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
-			pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
+			auto* pTargetItem = pBlackboardComponent->GetValueAsObject(FName("TargetItem"));
+			if (!pTargetItem)
+			{
+				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
+			}
 		}
 	}
 }
