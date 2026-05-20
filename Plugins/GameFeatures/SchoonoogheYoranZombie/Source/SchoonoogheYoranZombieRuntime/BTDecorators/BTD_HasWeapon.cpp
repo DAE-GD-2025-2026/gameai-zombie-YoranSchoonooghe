@@ -5,9 +5,15 @@
 #include "AIController.h"
 #include "Common/InventoryComponent.h"
 #include "Items/Weapon.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 bool UBTD_HasWeapon::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
+	UBlackboardComponent* pBlackboardComponent = OwnerComp.GetBlackboardComponent();
+	
+	auto* pWeapon = pBlackboardComponent->GetValueAsObject(EquippedWeaponKey.SelectedKeyName);
+	if (pWeapon) return true;
+
 	APawn* pSurvivor = OwnerComp.GetAIOwner()->GetPawn();
 	if (!pSurvivor)
 	{
@@ -24,10 +30,11 @@ bool UBTD_HasWeapon::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerCom
 	{
 		if (Cast<AWeapon>(pItem))
 		{
+			pBlackboardComponent->SetValueAsObject(EquippedWeaponKey.SelectedKeyName, pItem);
+
 			return true;
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("RUUUUN!"));
 	return false;
 }
