@@ -27,7 +27,7 @@ EBTNodeResult::Type UBTT_PickUpItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
         return EBTNodeResult::Failed;
     }
 
-    ABaseItem* pItem = Cast<ABaseItem>(pBlackboardComponent->GetValueAsObject(BlackboardKey.SelectedKeyName));
+    ABaseItem* pItem = Cast<ABaseItem>(pBlackboardComponent->GetValueAsObject(TargetItemKey.SelectedKeyName));
     if (!pItem)
     {
         return EBTNodeResult::Failed;
@@ -41,7 +41,12 @@ EBTNodeResult::Type UBTT_PickUpItem::ExecuteTask(UBehaviorTreeComponent& OwnerCo
         pInventory->GrabItem(index, pItem);
         //pInventory->UseItem(index);
 
-        pBlackboardComponent->ClearValue(BlackboardKey.SelectedKeyName);
+        pBlackboardComponent->ClearValue(TargetItemKey.SelectedKeyName);
+
+        if (pItem->IsA(pBlackboardComponent->GetValueAsClass(RequiredItemKey.SelectedKeyName)))
+        {
+            pBlackboardComponent->ClearValue(RequiredItemKey.SelectedKeyName);
+        }
 
         return EBTNodeResult::Succeeded;
     }

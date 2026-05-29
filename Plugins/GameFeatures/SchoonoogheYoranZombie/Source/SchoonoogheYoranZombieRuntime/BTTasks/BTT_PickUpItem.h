@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class SCHOONOOGHEYORANZOMBIERUNTIME_API UBTT_PickUpItem : public UBTTask_BlackboardBase
+class SCHOONOOGHEYORANZOMBIERUNTIME_API UBTT_PickUpItem : public UBTTaskNode
 {
 	GENERATED_BODY()
 
@@ -19,6 +19,9 @@ public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
-
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector TargetItemKey;
 	
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector RequiredItemKey;
 };

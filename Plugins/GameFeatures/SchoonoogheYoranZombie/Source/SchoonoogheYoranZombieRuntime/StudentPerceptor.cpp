@@ -6,6 +6,8 @@
 #include "AIController.h"
 #include "Zombies/BaseZombie.h"
 #include "Items/BaseItem.h"
+#include "PurgeZones/PurgeZone.h"
+#include "Village/House/House.h"
 
 UStudentPerceptor::UStudentPerceptor()
 {
@@ -49,10 +51,24 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			auto* pTargetItem = pBlackboardComponent->GetValueAsObject(FName("TargetItem"));
-			if (!pTargetItem)
+			if (!pTargetItem || Actor->IsA(pBlackboardComponent->GetValueAsClass(FName("RequiredItem"))))
 			{
 				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
 			}
+		}
+	}
+	else if (Cast<APurgeZone>(Actor))
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			pBlackboardComponent->SetValueAsObject(FName("PurgeZone"), Actor);
+		}
+	}
+	else if (Cast<AHouse>(Actor))
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			pBlackboardComponent->SetValueAsObject(FName("LastHouse"), Actor);
 		}
 	}
 }
