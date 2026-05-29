@@ -26,7 +26,7 @@ private:
     float ThresholdDistance = 1000.0f;
 
     UPROPERTY(EditAnywhere, Category = "Blackboard")
-    FBlackboardKeySelector TargetZombieKey;
+    FBlackboardKeySelector FleeTargetKey;
 
     UPROPERTY(EditAnywhere, Category = "Blackboard")
     FBlackboardKeySelector FleeLocationKey;

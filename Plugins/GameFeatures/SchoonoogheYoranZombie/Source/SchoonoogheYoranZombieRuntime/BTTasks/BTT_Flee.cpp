@@ -4,7 +4,7 @@
 #include "BTT_Flee.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
-#include "NavigationSystem.h"
+#include "Survivor/SurvivorPawn.h"
 
 EBTNodeResult::Type UBTT_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -16,22 +16,25 @@ EBTNodeResult::Type UBTT_Flee::ExecuteTask(UBehaviorTreeComponent& OwnerComp, ui
         return EBTNodeResult::Failed;
     }
 
-    AActor* pZombie = Cast<AActor>(pBlackboardComponent->GetValueAsObject(TargetZombieKey.SelectedKeyName));
-    if (!pZombie)
+    Cast<ASurvivorPawn>(pSurvivor)->StopRunning();
+
+    AActor* pFleeTarget = Cast<AActor>(pBlackboardComponent->GetValueAsObject(FleeTargetKey.SelectedKeyName));
+    if (!pFleeTarget)
     {
         return EBTNodeResult::Failed;
     }
 
     FVector survivorLocation = pSurvivor->GetActorLocation();
-    FVector toZombie = pZombie->GetActorLocation() - survivorLocation;
-    if (toZombie.SquaredLength() > ThresholdDistance * ThresholdDistance)
+    FVector toFleeTarget = pFleeTarget->GetActorLocation() - survivorLocation;
+    if (toFleeTarget.SquaredLength() > ThresholdDistance * ThresholdDistance)
     {
         return EBTNodeResult::Failed;
     }
 
-    FVector fleeDirection = -toZombie.GetSafeNormal();
+    FVector fleeDirection = -toFleeTarget.GetSafeNormal();
     FVector fleeLocation = survivorLocation + (fleeDirection * FleeDistance);
 
+    Cast<ASurvivorPawn>(pSurvivor)->StartRunning();
     pBlackboardComponent->SetValueAsVector(FleeLocationKey.SelectedKeyName, fleeLocation);
 
     return EBTNodeResult::Succeeded;

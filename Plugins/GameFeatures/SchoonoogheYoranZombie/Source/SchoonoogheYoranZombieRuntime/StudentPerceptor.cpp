@@ -69,10 +69,16 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			pBlackboardComponent->SetValueAsObject(FName("PurgeZone"), Actor);
 		}
 	}
-	else if (Cast<AHouse>(Actor))
+	else if (auto* pHouse = Cast<AHouse>(Actor))
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
+			if (!ExploredHouses.Contains(pHouse))
+			{
+				ExploredHouses.Add(pHouse);
+				pBlackboardComponent->SetValueAsObject(FName("TargetHouse"), Actor);
+			}
+			
 			pBlackboardComponent->SetValueAsObject(FName("LastHouse"), Actor);
 		}
 	}
