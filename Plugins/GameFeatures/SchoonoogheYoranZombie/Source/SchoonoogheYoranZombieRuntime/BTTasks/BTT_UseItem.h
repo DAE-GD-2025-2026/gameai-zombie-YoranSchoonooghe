@@ -21,4 +21,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, Category = "Item")
 	TSubclassOf<ABaseItem> ItemClass;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector RequiredItemKey;
 };

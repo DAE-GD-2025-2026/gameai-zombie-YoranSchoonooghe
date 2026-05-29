@@ -55,6 +55,11 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			{
 				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
 			}
+
+			else if (Cast<ABaseItem>(pTargetItem)->GetItemType() == EItemType::Garbage)
+			{
+				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
+			}
 		}
 	}
 	else if (Cast<APurgeZone>(Actor))
