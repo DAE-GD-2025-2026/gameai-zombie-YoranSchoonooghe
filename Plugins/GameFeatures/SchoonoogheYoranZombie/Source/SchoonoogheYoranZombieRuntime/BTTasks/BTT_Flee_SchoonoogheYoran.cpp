@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Survivor/SurvivorPawn.h"
+#include "Common/StaminaComponent.h"
 
 EBTNodeResult::Type UBTT_Flee_SchoonoogheYoran::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -15,8 +16,6 @@ EBTNodeResult::Type UBTT_Flee_SchoonoogheYoran::ExecuteTask(UBehaviorTreeCompone
     {
         return EBTNodeResult::Failed;
     }
-
-    Cast<ASurvivorPawn>(pSurvivor)->StopRunning();
 
     AActor* pFleeTarget = Cast<AActor>(pBlackboardComponent->GetValueAsObject(FleeTargetKey.SelectedKeyName));
     if (!pFleeTarget)
@@ -34,7 +33,17 @@ EBTNodeResult::Type UBTT_Flee_SchoonoogheYoran::ExecuteTask(UBehaviorTreeCompone
     FVector fleeDirection = -toFleeTarget.GetSafeNormal();
     FVector fleeLocation = survivorLocation + (fleeDirection * FleeDistance);
 
-    Cast<ASurvivorPawn>(pSurvivor)->StartRunning();
+    auto* pStamina = pSurvivor->FindComponentByClass<UStaminaComponent>();
+    if (!pStamina)
+    {
+        return EBTNodeResult::Failed;
+    }
+
+    if (bEnableRun && pStamina->GetCurrentStamina() > 0.0f)
+    {
+        Cast<ASurvivorPawn>(pSurvivor)->StartRunning();
+    }
+
     pBlackboardComponent->SetValueAsVector(FleeLocationKey.SelectedKeyName, fleeLocation);
 
     return EBTNodeResult::Succeeded;

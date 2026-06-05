@@ -22,17 +22,23 @@ void UStudentPerceptorSchoonoogheYoran::BeginPlay()
 	{
 		PerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &UStudentPerceptorSchoonoogheYoran::OnPerceptionUpdated);
 	}
+
+	AAIController* AIController = Cast<AAIController>(GetOwner()->GetInstigatorController());
+	if (!AIController) return;
+
+	UBlackboardComponent* pBlackboardComponent = AIController->GetBlackboardComponent();
+	if (!pBlackboardComponent) return;
+
+	pBlackboardComponent->SetValueAsVector(FName("SpawnLocation"), GetOwner()->GetActorLocation());
+}
+
+void UStudentPerceptorSchoonoogheYoran::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	UpdateUnexploredHouses(DeltaTime);
 }
 
 void UStudentPerceptorSchoonoogheYoran::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	//GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Green, 
-	//FString::Printf(TEXT("Saw Something!")));
-
-	//auto actorClass = Actor->GetClass();
-	//auto label = Actor->GetActorLabel();
-	//GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Green, label);
-
 	AAIController* AIController = Cast<AAIController>(GetOwner()->GetInstigatorController());
 	if (!AIController) return;
 
@@ -46,7 +52,7 @@ void UStudentPerceptorSchoonoogheYoran::OnPerceptionUpdated(AActor* Actor, FAISt
 			pBlackboardComponent->SetValueAsObject(FName("TargetZombie"), Actor);
 		}
 	}
-	else if (Cast<ABaseItem>(Actor))
+	else if (auto* pItem = Cast<ABaseItem>(Actor))
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
@@ -55,10 +61,13 @@ void UStudentPerceptorSchoonoogheYoran::OnPerceptionUpdated(AActor* Actor, FAISt
 			{
 				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
 			}
-
 			else if (Cast<ABaseItem>(pTargetItem)->GetItemType() == EItemType::Garbage)
 			{
 				pBlackboardComponent->SetValueAsObject(FName("TargetItem"), Actor);
+			}
+			else
+			{
+				SpottedItems.Add(pItem);
 			}
 		}
 	}
@@ -73,13 +82,44 @@ void UStudentPerceptorSchoonoogheYoran::OnPerceptionUpdated(AActor* Actor, FAISt
 	{
 		if (Stimulus.WasSuccessfullySensed())
 		{
-			if (!ExploredHouses.Contains(pHouse))
+			if (!SpottedHouses.Contains(pHouse))
 			{
-				ExploredHouses.Add(pHouse);
-				pBlackboardComponent->SetValueAsObject(FName("TargetHouse"), Actor);
+				SpottedHouses.Add(pHouse);
+				UnexploredHouses.Add(pHouse);
+
+				auto* pTargetHouse = pBlackboardComponent->GetValueAsObject(FName("TargetHouse"));
+				if (!pTargetHouse)
+				{
+					pBlackboardComponent->SetValueAsObject(FName("TargetHouse"), Actor);
+				}
 			}
-			
-			pBlackboardComponent->SetValueAsObject(FName("LastHouse"), Actor);
 		}
+	}
+}
+
+void UStudentPerceptorSchoonoogheYoran::UpdateUnexploredHouses(float DeltaTime)
+{
+	elapsedTimeHouses += DeltaTime;
+
+	float const resetHouseThreshold{ 80.0f };
+	if (elapsedTimeHouses > resetHouseThreshold)
+	{
+		AAIController* AIController = Cast<AAIController>(GetOwner()->GetInstigatorController());
+		if (!AIController) return;
+
+		UBlackboardComponent* pBlackboardComponent = AIController->GetBlackboardComponent();
+		if (!pBlackboardComponent) return;
+
+		auto* pHouse = *SpottedHouses.begin();
+		if (!pHouse) return;
+
+		UnexploredHouses.Add(pHouse);
+		auto* pTargetHouse = pBlackboardComponent->GetValueAsObject(FName("TargetHouse"));
+		if (!pTargetHouse)
+		{
+			pBlackboardComponent->SetValueAsObject(FName("TargetHouse"), pHouse);
+		}
+
+		elapsedTimeHouses = 0.0f;
 	}
 }

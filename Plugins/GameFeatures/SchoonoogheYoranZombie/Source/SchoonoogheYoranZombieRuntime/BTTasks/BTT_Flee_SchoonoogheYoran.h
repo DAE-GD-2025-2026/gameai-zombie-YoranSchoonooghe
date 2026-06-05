@@ -30,4 +30,7 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Blackboard")
     FBlackboardKeySelector FleeLocationKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard")
+    bool bEnableRun{ true };
 };

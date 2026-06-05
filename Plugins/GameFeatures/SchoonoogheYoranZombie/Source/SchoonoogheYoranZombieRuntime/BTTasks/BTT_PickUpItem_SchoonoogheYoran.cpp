@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "Common/InventoryComponent.h"
 #include "Items/BaseItem.h"
+#include "SchoonoogheYoranZombieRuntime/StudentPerceptorSchoonoogheYoran.h"
 
 EBTNodeResult::Type UBTT_PickUpItem_SchoonoogheYoran::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -39,13 +40,18 @@ EBTNodeResult::Type UBTT_PickUpItem_SchoonoogheYoran::ExecuteTask(UBehaviorTreeC
         if (pItemsInInventory[index]) continue;
 
         pInventory->GrabItem(index, pItem);
-        //pInventory->UseItem(index);
 
         pBlackboardComponent->ClearValue(TargetItemKey.SelectedKeyName);
 
         if (pItem->IsA(pBlackboardComponent->GetValueAsClass(RequiredItemKey.SelectedKeyName)))
         {
             pBlackboardComponent->ClearValue(RequiredItemKey.SelectedKeyName);
+        }
+
+        auto* pPerceptor = pSurvivor->FindComponentByClass<UStudentPerceptorSchoonoogheYoran>();
+        if (pPerceptor)
+        {
+            pPerceptor->SpottedItems.Remove(pItem);
         }
 
         return EBTNodeResult::Succeeded;
